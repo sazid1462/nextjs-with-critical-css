@@ -1,0 +1,60 @@
+version: "3.4"
+
+services:
+  my-nginx:
+    image: my-nginx:latest
+    container_name: my-nginx
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    networks:
+      - my-net
+    volumes:
+      - ./nginx/staging/conf.d:/etc/nginx/conf.d
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: always
+  next-app:
+    container_name: next-app
+    image: next-app:latest
+    build:
+      context: ./next-app
+      dockerfile: Dockerfile
+    networks:
+      - my-net
+    volumes:
+      - ./.next/static/css:/usr/src/app/.next/static/css
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=dev
+      - APP_ENV=dev
+      - CDN_URL=http://localhost:3000/
+      - API_BASE_URL=http://jsonplaceholder.typicode.com/
+      - CRITICAL_CSS_BASE_URL=penthouse-server:3030/
+      - PORT=3000
+    restart: always
+  penthouse-server:
+    container_name: penthouse-server
+    image: penthouse-server:latest
+    build:
+      context: ./penthouse-server
+      dockerfile: Dockerfile
+    networks:
+      - my-net
+    volumes:
+      - ./next-app/.next/static/css:/usr/src/app/css
+      - ./next-app/.next/static/critical-css:/usr/src/app/critical-css
+    ports:
+      - "3030:3030"
+    environment:
+      - NODE_ENV=dev
+      - NEXT_APP_BASE_URL=next-app:3000/
+      - CSS_FILES_PATH=/usr/src/app/css/
+      - CRITCAL_CSS_FILES_PATH=/usr/src/app/critical-css/
+      - PORT=3030
+    restart: always
+networks:
+  my-net:
+    driver: bridge

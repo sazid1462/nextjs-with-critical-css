@@ -1,0 +1,39 @@
+{
+  "name": "nextjs-critical-css",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "NODE_ENV=development node --experimental-modules server/index.mjs",
+    "build": "NODE_ENV=production next build",
+    "start": "cross-env NODE_ENV=production node --experimental-modules server/index.mjs"
+  },
+  "dependencies": {
+    "babel-eslint": "^10.1.0",
+    "babel-plugin-import": "^1.13.0",
+    "bootstrap": "^5.0.0-alpha1",
+    "core-js": "^3.6.5",
+    "cross-env": "^7.0.2",
+    "dotenv": "^8.2.0",
+    "eslint": "^7.3.1",
+    "eslint-config-react-app": "^5.2.1",
+    "eslint-config-standard-jsx": "^8.1.0",
+    "eslint-loader": "^4.0.2",
+    "eslint-plugin-import": "^2.22.0",
+    "eslint-plugin-jsx-a11y": "^6.3.1",
+    "eslint-plugin-react": "^7.20.0",
+    "express": "^4.17.1",
+    "express-healthcheck": "^0.1.0",
+    "fg-loadcss": "^3.1.0",
+    "lodash": "^4.17.15",
+    "next": "9.4.4",
+    "next-offline": "^5.0.2",
+    "next-page-transitions": "^1.0.0-beta.2",
+    "next-purgecss": "^4.0.0",
+    "nprogress": "^0.2.0",
+    "purgecss": "^2.3.0",
+    "react": "16.13.1",
+    "react-dom": "16.13.1",
+    "react-toastify": "^6.0.6",
+    "sass": "^1.26.9"
+  }
+}
