@@ -21,10 +21,17 @@ services:
     build:
       context: ./next-app
       dockerfile: Dockerfile
+      args:
+      - NODE_ENV=dev
+      - APP_ENV=dev
+      - CDN_URL=http://localhost:3000/
+      - API_BASE_URL=http://jsonplaceholder.typicode.com/
+      - CRITICAL_CSS_BASE_URL=penthouse-server:3030/
+      - PORT=3000
     networks:
       - my-net
     volumes:
-      - ./.next/static/css:/usr/src/app/.next/static/css
+      - ./container-data/css:/usr/src/app/.data
     ports:
       - "3000:3000"
     environment:
@@ -44,8 +51,8 @@ services:
     networks:
       - my-net
     volumes:
-      - ./next-app/.next/static/css:/usr/src/app/css
-      - ./next-app/.next/static/critical-css:/usr/src/app/critical-css
+      - ./container-data/css:/usr/src/app/css
+      - ./container-data/critical-css:/usr/src/app/critical-css
     ports:
       - "3030:3030"
     environment:

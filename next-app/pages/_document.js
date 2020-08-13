@@ -12,7 +12,7 @@ const getCriticalCSSAsync = async (pathname) => {
 
     const content = await res.text();
 
-    return {key: pathname, content};
+    return { key: pathname, content };
   } catch (err) {
     console.error(err);
     return null;
@@ -54,14 +54,14 @@ class DeferStylesHead extends Head {
 
     cssLinkElements.push(
       <script
-        key="__STYLES_TO_LOAD"
+        key="__DEFERRED_STYLES"
         dangerouslySetInnerHTML={{
           __html: `
-            window.__STYLES_TO_LOAD = ${JSON.stringify(cssHrefs)}
+            window.__DEFERRED_STYLES = ${JSON.stringify(cssHrefs)}
           `,
         }}
-      />
-    )
+      />,
+    );
 
     return cssLinkElements.length === 0 ? null : cssLinkElements
   }
@@ -92,47 +92,47 @@ export default class InStorageDocument extends Document {
   }
 
   render() {
-    const {assetPrefix, critCSS, files} = this.props;
+    const { assetPrefix, critCSS, files } = this.props;
     const cssFiles =
       files && files.length ? files.filter((f) => f.endsWith('.css')) : []
 
     return (
       <Html lang="sv">
         <DeferStylesHead>
-          <meta charSet="utf-8"/>
-          <meta name="author" content="Sazedul Islam"/>
+          <meta charSet="utf-8" />
+          <meta name="author" content="Sazedul Islam" />
           <meta
             name="viewport"
             content="height=device-height, width=device-width, initial-scale=1.0,
                      minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,
                      target-densitydpi=device-dpi, shrink-to-fit=no"
           />
-          <meta property="og:site_name" content="NextJS with CriticalCSS Generator"/>
-          <link rel="shortcut icon" type="image/png" href="/favicon.ico"/>
-          <link rel="preconnect" href={process.env.API_BASE_URL} crossOrigin=""/>
+          <meta property="og:site_name" content="NextJS with CriticalCSS Generator" />
+          <link rel="shortcut icon" type="image/png" href="/favicon.ico" />
+          <link rel="preconnect" href={process.env.API_BASE_URL} crossOrigin="" />
           {critCSS &&
-          <style
-            key={critCSS.file}
-            dangerouslySetInnerHTML={{
-              __html: critCSS.content
-            }}
-          />}
+            <style
+              key={critCSS.file}
+              dangerouslySetInnerHTML={{
+                __html: critCSS.content
+              }}
+            />}
           {critCSS &&
-          <script
-            key="__CRITICAL_CSS_INLINED"
-            dangerouslySetInnerHTML={{
-              __html: `
+            <script
+              key="__CRITICAL_CSS_INLINED"
+              dangerouslySetInnerHTML={{
+                __html: `
               window.__CRITICAL_CSS_INLINED = ${JSON.stringify(true)}
             `,
-            }}
-          />}
+              }}
+            />}
           {!critCSS && getStylesLinkElements(assetPrefix, cssFiles)}
         </DeferStylesHead>
         <body>
-          <noscript id="loadcss"/>
+          <noscript id="loadcss" />
 
-          <Main/>
-          <NextScript/>
+          <Main />
+          <NextScript />
         </body>
       </Html>
     );

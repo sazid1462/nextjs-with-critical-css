@@ -4,11 +4,12 @@ import dotenv from 'dotenv';
 import express from 'express';
 import expressHealthcheck from 'express-healthcheck';
 import next from 'next';
-import { resolve } from 'path';
+const { copyFileSync, readdirSync, existsSync, mkdirSync, unlinkSync } = require('fs');
+const { resolve } = require('path');
 dotenv.config();
 
 const port = parseInt(process.env.PORT, 10) || 3000;
-const app = next({dev});
+const app = next({ dev });
 const handle = app.getRequestHandler();
 
 function generateCriticalCss(req) {
@@ -26,7 +27,7 @@ function generateCriticalCss(req) {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({pagePath: originalPath})
+        body: JSON.stringify({ pagePath: originalPath })
       });
 
       if (res.status >= 400) {
@@ -73,25 +74,6 @@ const createServer = () => {
   // If you test in production mode, remember to manually unregister the production service worker after
   setupServiceWorker(server);
 
-  server.get('/hyraforrad/s', (req, res) => {
-    return app.render(req, res, '/hyraforrad/dynamic-seo-pages');
-  });
-
-  server.get('/hyraforrad/s/:slug', (req, res) => {
-    return app.render(req, res, '/hyraforrad/dynamic-seo-pages', {seoSlug: req.params.slug});
-  });
-
-  server.get('/api/ip', (req, res) => {
-
-    const ip = (req.headers['x-forwarded-for'] || '').split(',').pop() ||
-            req.connection.remoteAddress ||
-            req.socket.remoteAddress ||
-            req.connection.socket.remoteAddress;
-
-
-    return res.send({ip});
-  });
-
   server.get('*', (req, res) => {
     // process.env.NODE_ENV === "production" &&
     generateCriticalCss(req);
@@ -101,6 +83,19 @@ const createServer = () => {
   return server;
 };
 
+// cleanup
+const dataPath = resolve('.data');
+const cssPath = resolve('.next/static/css');
+
+!existsSync(dataPath) && mkdirSync(dataPath);
+readdirSync(dataPath).forEach((d) => {
+  unlinkSync(resolve(dataPath, d));
+})
+readdirSync(cssPath).forEach((d) => {
+  copyFileSync(resolve(cssPath, d), resolve(dataPath, d));
+})
+
+// prepare server
 const server = createServer();
 app.prepare()
   .then(() => {

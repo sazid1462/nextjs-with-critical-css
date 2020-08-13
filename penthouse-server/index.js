@@ -2,13 +2,13 @@ const parser = require("body-parser");
 const dotenv = require('dotenv');
 const express = require('express');
 const expressHealthcheck = require('express-healthcheck');
-const { existsSync, mkdirSync, readdir, readFileSync, writeFile } = require("fs");
+const { existsSync, mkdirSync, readdir, readFileSync, writeFile, unlinkSync, readdirSync } = require("fs");
 const { memoize } = require("lodash");
 const { resolve } = require('path');
 const CriticalCSS = require("./criticalcss");
 dotenv.config();
 
-const port = parseInt(process.env.PORT, 10) || 3000;
+const port = parseInt(process.env.PORT, 10) || 3030;
 const cssFilesPath = resolve(process.env.CSS_FILES_PATH || 'out/css/');
 const criticalCSSPath = resolve(process.env.CRITCAL_CSS_FILES_PATH || 'out/critical-css/');
 
@@ -25,15 +25,15 @@ const isExists = (file) => {
 
 function readCSSFiles(onFileContent, onError) {
   const dirname = cssFilesPath;
-  readdir(dirname, function(err, filenames) {
+  readdir(dirname, function (err, filenames) {
     if (err) {
       onError(err);
       return;
     }
     let content = "";
-    filenames.forEach(function(filename) {
+    filenames.forEach(function (filename) {
       const fcontent = getContent(resolve(cssFilesPath, filename));
-      content += fcontent+"\n";
+      content += fcontent + "\n";
     });
     onFileContent(content);
   });
@@ -73,7 +73,7 @@ function generateCriticalCss(pagePath, callback) {
       inProgress[critCSSFilename] = false;
       callback(false);
     });
-  }, (err)=>{
+  }, (err) => {
     console.error(err.message);
     inProgress[critCSSFilename] = false;
     callback(false);
@@ -96,8 +96,8 @@ const getCriticalCSS = (pathname) => {
 const createServer = () => {
   const server = express();
 
-  !existsSync(cssFilesPath) && mkdirSync(cssFilesPath, {recursive: true});
-  !existsSync(criticalCSSPath) && mkdirSync(criticalCSSPath, {recursive: true});
+  !existsSync(cssFilesPath) && mkdirSync(cssFilesPath, { recursive: true });
+  !existsSync(criticalCSSPath) && mkdirSync(criticalCSSPath, { recursive: true });
 
   server.use(parser.urlencoded({ extended: true }));
   server.use(parser.json());
@@ -140,6 +140,12 @@ const createServer = () => {
   return server;
 };
 
+// cleanup
+readdirSync(criticalCSSPath).forEach((d) => {
+  unlinkSync(resolve(criticalCSSPath, d));
+})
+
+// prepare server
 const server = createServer();
 server.listen(port, (err) => {
   if (err) throw err;
