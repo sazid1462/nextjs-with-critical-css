@@ -1,3 +1,19 @@
+# README #
+
+This is an example NextJS server that has many external CSS files imported. That's why the CSS needs to be purged and optimized by separating
+Critical Path CSS from regular CSS.
+
+Use the following environment variables for convenient development environment:
+
+    APP_ENV=dev
+    CDN_URL=http://localhost:3000/
+    API_BASE_URL=http://jsonplaceholder.typicode.com/
+    CRITICAL_CSS_BASE_URL=http://localhost:3030/
+    PORT=3000
+
+
+## NextJS
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started

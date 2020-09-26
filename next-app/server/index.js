@@ -1,25 +1,27 @@
 const dev = process.env.NODE_ENV !== 'production';
-import fetch from 'cross-fetch';
-import dotenv from 'dotenv';
-import express from 'express';
-import expressHealthcheck from 'express-healthcheck';
-import next from 'next';
-const { copyFileSync, readdirSync, existsSync, mkdirSync, unlinkSync } = require('fs');
-const { resolve } = require('path');
+const dotenv = require('dotenv');
 dotenv.config();
 
-const port = parseInt(process.env.PORT, 10) || 3000;
+const fetch = require('cross-fetch');
+const express = require('express');
+const expressHealthcheck = require('express-healthcheck');
+
+const { copyFileSync, readdirSync, existsSync, mkdirSync, unlinkSync } = require('fs');
+const { resolve } = require('path');
+
+const next = require('next');
 const app = next({ dev });
 const handle = app.getRequestHandler();
+
+const port = parseInt(process.env.PORT, 10) || 3000;
 
 function generateCriticalCss(req) {
   const critCSSBaseUrl = process.env.CRITICAL_CSS_BASE_URL;
   const originalPath = req.originalUrl.split('?')[0];
 
-  if (originalPath.startsWith('/_') || originalPath.includes('.')) {
-    // console.log('Skipping CSS generation for:', url);
-    return;
-  }
+  // Skipping CSS generation for some NextJS internal routes and for static contents
+  if (originalPath.startsWith('/_') || originalPath.includes('.')) return;
+
   (async () => {
     try {
       const res = await fetch(critCSSBaseUrl, {
@@ -75,8 +77,8 @@ const createServer = () => {
   setupServiceWorker(server);
 
   server.get('*', (req, res) => {
-    // process.env.NODE_ENV === "production" &&
-    generateCriticalCss(req);
+    // Skip generating Critical CSS while in development.
+    if (!dev) generateCriticalCss(req, res);
     return handle(req, res);
   });
 
@@ -85,13 +87,14 @@ const createServer = () => {
 
 // cleanup
 const dataPath = resolve('.data');
-const cssPath = resolve('.next/static/css');
-
 !existsSync(dataPath) && mkdirSync(dataPath);
 readdirSync(dataPath).forEach((d) => {
   unlinkSync(resolve(dataPath, d));
 })
-readdirSync(cssPath).forEach((d) => {
+
+// Collect CSS files to Generate CSS from
+const cssPath = resolve('.next/static/css');
+existsSync(cssPath) && readdirSync(cssPath).forEach((d) => {
   copyFileSync(resolve(cssPath, d), resolve(dataPath, d));
 })
 

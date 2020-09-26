@@ -15,7 +15,7 @@ const webpackConfig = (config) => {
     // solution that requires the user to opt into importing specific locales.
     // https://github.com/jmblog/how-to-optimize-momentjs-with-webpack
     // You can remove this if you don't use Moment.js:
-    new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /sv/)
+    new webpack.ContextReplacementPlugin(/moment[/\\]locale$/, /en/)
   );
   return config;
 };
@@ -35,6 +35,7 @@ module.exports = withOffline(withPurgeCss({
   // purgeCssEnabled: ({ dev, isServer }) => !dev && !isServer, // Only enable PurgeCSS for client-side production builds
   webpack: webpackConfig,
   env: {
+    // List the env variables you want to be avalable in process.env while executing in browser. Never put secret keys or passwords here.
     API_BASE_URL: process.env.API_BASE_URL,
     CDN_URL: process.env.CDN_URL,
     APP_ENV: process.env.APP_ENV,

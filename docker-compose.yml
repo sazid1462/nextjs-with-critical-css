@@ -2,11 +2,8 @@ version: "3.4"
 
 services:
   my-nginx:
-    image: my-nginx:latest
+    image: fholzer/nginx-brotli:latest
     container_name: my-nginx
-    build:
-      context: ./nginx
-      dockerfile: Dockerfile
     networks:
       - my-net
     volumes:
@@ -22,25 +19,23 @@ services:
       context: ./next-app
       dockerfile: Dockerfile
       args:
-      - NODE_ENV=dev
-      - APP_ENV=dev
-      - CDN_URL=http://localhost:3000/
-      - API_BASE_URL=http://jsonplaceholder.typicode.com/
-      - CRITICAL_CSS_BASE_URL=penthouse-server:3030/
-      - PORT=3000
+      - APP_ENV=${APP_ENV}
+      - CDN_URL=${CDN_URL}
+      - API_BASE_URL=${API_BASE_URL}
+      - CRITICAL_CSS_BASE_URL=http://penthouse-server:${PENTHOUSE_SERVER_PORT}/
+      - PORT=${PORT}
     networks:
       - my-net
     volumes:
       - ./container-data/css:/usr/src/app/.data
     ports:
-      - "3000:3000"
+      - "3000:${NEXT_APP_PORT}"
     environment:
-      - NODE_ENV=dev
-      - APP_ENV=dev
-      - CDN_URL=http://localhost:3000/
-      - API_BASE_URL=http://jsonplaceholder.typicode.com/
-      - CRITICAL_CSS_BASE_URL=penthouse-server:3030/
-      - PORT=3000
+      - APP_ENV=${APP_ENV}
+      - CDN_URL=${CDN_URL}
+      - API_BASE_URL=${API_BASE_URL}
+      - CRITICAL_CSS_BASE_URL=http://penthouse-server:${PENTHOUSE_SERVER_PORT}/
+      - PORT=${NEXT_APP_PORT}
     restart: always
   penthouse-server:
     container_name: penthouse-server
@@ -53,14 +48,11 @@ services:
     volumes:
       - ./container-data/css:/usr/src/app/css
       - ./container-data/critical-css:/usr/src/app/critical-css
-    ports:
-      - "3030:3030"
     environment:
-      - NODE_ENV=dev
-      - NEXT_APP_BASE_URL=next-app:3000/
-      - CSS_FILES_PATH=/usr/src/app/css/
-      - CRITCAL_CSS_FILES_PATH=/usr/src/app/critical-css/
-      - PORT=3030
+      - NEXT_APP_BASE_URL=http://next-app:${NEXT_APP_PORT}/
+      - CSS_FILES_PATH=${CSS_FILES_PATH}
+      - CRITCAL_CSS_FILES_PATH=${CRITCAL_CSS_FILES_PATH}
+      - PORT=${PENTHOUSE_SERVER_PORT}
     restart: always
 networks:
   my-net:

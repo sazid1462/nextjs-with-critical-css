@@ -1,7 +1,7 @@
 const penthouse = require('penthouse');
 
 class CriticalCSS {
-  static generate (pageUrl, cssString) {
+  static generate(pageUrl, cssString) {
     const penthouseOptions = {
       cssString
     }

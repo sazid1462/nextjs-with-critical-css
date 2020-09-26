@@ -96,9 +96,6 @@ const getCriticalCSS = (pathname) => {
 const createServer = () => {
   const server = express();
 
-  !existsSync(cssFilesPath) && mkdirSync(cssFilesPath, { recursive: true });
-  !existsSync(criticalCSSPath) && mkdirSync(criticalCSSPath, { recursive: true });
-
   server.use(parser.urlencoded({ extended: true }));
   server.use(parser.json());
 
@@ -120,6 +117,7 @@ const createServer = () => {
 
   server.use('/health', expressHealthcheck());
 
+  // Create a route to retrieve Critical CSS
   server.get('/', (req, res) => {
     let pagePath = req.query.pagePath;
     if (!pagePath) pagePath = '/';
@@ -129,6 +127,7 @@ const createServer = () => {
     // res.status(404).send("Not Found");
   });
 
+  // Create a route to generate Critical CSS
   server.post('/', (req, res) => {
     let pagePath = req.body.pagePath;
     if (!pagePath) pagePath = '/';
@@ -141,11 +140,14 @@ const createServer = () => {
 };
 
 // cleanup
-readdirSync(criticalCSSPath).forEach((d) => {
+existsSync(criticalCSSPath) && readdirSync(criticalCSSPath).forEach((d) => {
   unlinkSync(resolve(criticalCSSPath, d));
 })
 
 // prepare server
+!existsSync(cssFilesPath) && mkdirSync(cssFilesPath, { recursive: true });
+!existsSync(criticalCSSPath) && mkdirSync(criticalCSSPath, { recursive: true });
+
 const server = createServer();
 server.listen(port, (err) => {
   if (err) throw err;

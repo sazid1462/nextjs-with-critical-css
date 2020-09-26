@@ -15,7 +15,8 @@
         }
     },
     "plugins": [
-        "react"
+        "react",
+        "simple-import-sort"
     ],
     "extends": [
         "standard-jsx"
@@ -53,6 +54,8 @@
         "jsx-quotes": [
             "warn",
             "prefer-double"
-        ]
+        ],
+        "simple-import-sort/sort": "error",
+        "sort-imports": "off"
     }
 }

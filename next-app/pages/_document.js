@@ -2,6 +2,10 @@ import Document, { Head, Html, Main, NextScript } from 'next/document';
 import React from 'react';
 
 const getCriticalCSSAsync = async (pathname) => {
+  if (process.env.NODE_ENV !== 'production') {
+    // Early return as we don't generate Critical CSS for development.
+    return null;
+  }
   try {
     const critCSSBaseUrl = process.env.CRITICAL_CSS_BASE_URL;
     const res = await fetch(`${critCSSBaseUrl}?pagePath=${pathname}`);
@@ -14,7 +18,7 @@ const getCriticalCSSAsync = async (pathname) => {
 
     return { key: pathname, content };
   } catch (err) {
-    console.error(err);
+    console.error(err.message);
     return null;
   }
 }
@@ -48,9 +52,7 @@ class DeferStylesHead extends Head {
       )
     })
 
-    const cssHrefs = cssFiles.map(file => `${assetPrefix}/_next/${encodeURI(
-      file
-    )}${_devOnlyInvalidateCacheQueryString}`);
+    const cssHrefs = cssFiles.map((file) => `${assetPrefix}/_next/${encodeURI(file,)}${_devOnlyInvalidateCacheQueryString}`);
 
     cssLinkElements.push(
       <script
@@ -97,19 +99,21 @@ export default class InStorageDocument extends Document {
       files && files.length ? files.filter((f) => f.endsWith('.css')) : []
 
     return (
-      <Html lang="sv">
+      <Html lang="en">
         <DeferStylesHead>
           <meta charSet="utf-8" />
           <meta name="author" content="Sazedul Islam" />
           <meta
             name="viewport"
             content="height=device-height, width=device-width, initial-scale=1.0,
-                     minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,
-                     target-densitydpi=device-dpi, shrink-to-fit=no"
+                     minimum-scale=1.0, target-densitydpi=device-dpi, shrink-to-fit=no"
           />
           <meta property="og:site_name" content="NextJS with CriticalCSS Generator" />
+          <link rel="manifest" href="/manifest.json" />
           <link rel="shortcut icon" type="image/png" href="/favicon.ico" />
           <link rel="preconnect" href={process.env.API_BASE_URL} crossOrigin="" />
+
+          {/** Add Critical CSS inline if available. */}
           {critCSS &&
             <style
               key={critCSS.file}
@@ -117,6 +121,7 @@ export default class InStorageDocument extends Document {
                 __html: critCSS.content
               }}
             />}
+          {/** Set the __CRITICAL_CSS_INLINED flag to true to prevent loading CSS with link tag if Critical CSS is inlined. */}
           {critCSS &&
             <script
               key="__CRITICAL_CSS_INLINED"
@@ -126,6 +131,7 @@ export default class InStorageDocument extends Document {
             `,
               }}
             />}
+          {/** Load CSS using link tag if Critical CSS is not available yet. */}
           {!critCSS && getStylesLinkElements(assetPrefix, cssFiles)}
         </DeferStylesHead>
         <body>
